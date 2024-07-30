@@ -25,4 +25,5 @@ def empty_temp():
 
     :return: None
     """
-    os.remove("temp")
+
+    os.remove(f'temp/yourQRcode{num}.png')

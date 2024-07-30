@@ -4,6 +4,10 @@ from random import randint
 
 
 def zipfile(name, file):
+    """
+    Gets the user file and make zip file with unique name.
+    """
+
     with open(name, 'wb') as f:
         f.write(file)
 
@@ -12,10 +16,8 @@ def zipfile(name, file):
     with ZipFile(f"temp/yourZip{num}.zip", 'w') as zipfile:
         zipfile.write(name)
 
-
     zipf = open(f"temp/yourZip{num}.zip", 'rb')
     return zipf
-
 
 
 def empty_temp():

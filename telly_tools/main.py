@@ -78,7 +78,8 @@ def callback(call):
 @bot.message_handler(func=lambda m: m.text == "ZIP My File")
 def zip_request(message):
     bot.send_chat_action(message.chat.id, action="typing")
-    user_file = bot.send_message(message.chat.id, text="Ok, send me your file to see its zip 🤐\nIf you send me media like image or video note send them in file format without compression")
+    user_file = bot.send_message(message.chat.id,
+                                 text="Ok, send me your file to see its zip 🤐\nIf you send me media like image or video note send them in file format without compression")
     bot.register_next_step_handler(user_file, make_zip)
 
 
@@ -97,6 +98,7 @@ def make_zip(message):
     bot.send_message(message.chat.id, text="What else should I do? 🫡",
                      reply_markup=markup)
     zip_maker.empty_temp()
+
 
 @bot.message_handler(func=lambda m: m.text == "Remove Photo Background")
 def pdf(message):
