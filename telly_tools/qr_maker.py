@@ -5,7 +5,7 @@ from random import randint
 
 def qrcode(link):
     """
-    Get link from bot and make Qr png with unique name
+    Get link from bot and make Qr png with unique name.
 
     :param link: text that user sent
     :return: qr code in png format
@@ -18,5 +18,11 @@ def qrcode(link):
     qr_image = open(f'temp/yourQRcode{num}.png', 'rb')
     return qr_image
 
+
 def empty_temp():
-    os.remove(f"temp/yourQRcode{num}.png")
+    """
+    clean the qr image after sending to user.
+
+    :return: None
+    """
+    os.remove("temp")
