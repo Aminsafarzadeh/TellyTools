@@ -11,12 +11,13 @@ def zipfile(name, file):
     with open(name, 'wb') as f:
         f.write(file)
 
-    global num, zipf
+    global file_path, zipf
     num = randint(1000000, 9999999)
-    with ZipFile(f"temp/yourZip{num}.zip", 'w') as zipfile:
+    file_path = f"temp/yourZip{num}.zip"
+    with ZipFile(file_path, 'w') as zipfile:
         zipfile.write(name)
 
-    zipf = open(f"temp/yourZip{num}.zip", 'rb')
+    zipf = open(file_path, 'rb')
     return zipf
 
 
@@ -27,4 +28,4 @@ def empty_temp():
     :return: None
     """
     zipf.close()
-    os.remove(f"temp/yourZip{num}.zip")
+    os.remove(file_path)

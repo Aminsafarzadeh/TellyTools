@@ -11,11 +11,12 @@ def qrcode(link):
     :return: qr code in png format
     """
 
-    global num
+    global image_path
     url = pyqrcode.create(link)
     num = randint(1000000, 9999999)
-    url.png(f"temp/yourQRcode{num}.png", scale=20)
-    qr_image = open(f'temp/yourQRcode{num}.png', 'rb')
+    image_path = f"temp/yourQRcode{num}.png"
+    url.png(image_path, scale=20)
+    qr_image = open(image_path, 'rb')
     return qr_image
 
 
@@ -26,4 +27,4 @@ def empty_temp():
     :return: None
     """
 
-    os.remove(f'temp/yourQRcode{num}.png')
+    os.remove(image_path)

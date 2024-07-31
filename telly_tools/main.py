@@ -19,16 +19,12 @@ def start(message):
 
     bot.send_chat_action(message.chat.id, action="typing")
     bot.send_message(message.chat.id, text="Hey, this is Telly Tools👋\nYour lovely toolbox 😇")
-    start_buttons = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    start_buttons = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True)
     verify_buttons = types.KeyboardButton(text="Verify My Number", request_contact=True)
     start_buttons.add("Convert Image to PDF", "Make QR from Link", "ZIP My File", "Remove Photo Background",
                       "Add Black & White to My Photo", verify_buttons)
     bot.send_chat_action(message.chat.id, action="typing")
     bot.send_message(message.chat.id, text="What can I do for you? 😊", reply_markup=start_buttons)
-
-
-def menu():
-    pass
 
 
 @bot.message_handler(commands=['help'])
