@@ -3,6 +3,7 @@ from telebot import types
 from API_Holder import API_TOKEN
 import qr_maker
 import zip_maker
+import rmbg_maker
 
 bot = telebot.TeleBot(API_TOKEN)
 
@@ -71,6 +72,8 @@ def callback(call):
         qr_request(call.message)
     elif call.data == 'zip_request':
         zip_request(call.message)
+    elif call.data == 'rmbg_request':
+        rmbg_request(call.message)
     elif call.data == 'start':
         start(call.message)
 
@@ -79,7 +82,8 @@ def callback(call):
 def zip_request(message):
     bot.send_chat_action(message.chat.id, action="typing")
     user_file = bot.send_message(message.chat.id,
-                                 text="Ok, send me your file to see its zip 🤐\nIf you send me media like image or video note send them in file format without compression")
+                                 text="Ok, send me your file to see its zip 🤐\nIf you send me media like image or "
+                                      "video note send them in file format without compression")
     bot.register_next_step_handler(user_file, make_zip)
 
 
@@ -101,8 +105,25 @@ def make_zip(message):
 
 
 @bot.message_handler(func=lambda m: m.text == "Remove Photo Background")
-def pdf(message):
-    pass
+def rmbg_request(message):
+    bot.send_chat_action(message.chat.id, action="typing")
+    user_photo = bot.send_message(message.chat.id, text="Ok, send me your photo to me 🏞")
+    bot.register_next_step_handler(user_photo, make_rmbg)
+
+
+def make_rmbg(message):
+    file_info = bot.get_file(message.photo[-1].file_id)
+    downloaded_file = bot.download_file(file_info.file_path)
+    image = rmbg_maker.remover(downloaded_file)
+    bot.send_chat_action(message.chat.id, action='upload_photo')
+    photo = bot.send_photo(message.chat.id, image)
+    bot.reply_to(photo, text="Here's your photo without background! ☝️☝️")
+    button1 = types.InlineKeyboardButton("Remove background ", callback_data='rmbg_request')
+    button2 = types.InlineKeyboardButton("Take me to the start", callback_data='start')
+    markup = telebot.types.InlineKeyboardMarkup(row_width=1)
+    markup.add(button1, button2)
+    bot.send_message(message.chat.id, text="What else should I do? 🫡",
+                     reply_markup=markup)
 
 
 @bot.message_handler(func=lambda m: m.text == "تبدیل عکس به PDF")
