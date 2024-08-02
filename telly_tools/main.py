@@ -4,6 +4,7 @@ from API_Holder import API_TOKEN
 import qr_maker
 import zip_maker
 import rmbg_maker
+import pdf_maker
 
 bot = telebot.TeleBot(API_TOKEN)
 
@@ -33,8 +34,25 @@ def help(message):
 
 
 @bot.message_handler(func=lambda m: m.text == "Convert Image to PDF")
-def pdf(message):
-    pass
+def pdf_request(message):
+    bot.send_chat_action(message.chat.id, action="typing")
+    user_photo = bot.send_message(message.chat.id, text="Ok, send me your photo 🏞")
+    bot.register_next_step_handler(user_photo, make_pdf)
+def make_pdf(message):
+    file_info = bot.get_file(message.photo[-1].file_id)
+    downloaded_file = bot.download_file(file_info.file_path)
+    pdf = pdf_maker.img_to_pdf(downloaded_file)
+    bot.send_chat_action(message.chat.id, action='upload_document')
+    file = bot.send_document(message.chat.id, pdf)
+    bot.reply_to(file, text="Here's your PDF! ☝️☝️")
+    button1 = types.InlineKeyboardButton("Make another PDF", callback_data='pdf_request')
+    button2 = types.InlineKeyboardButton("Take me to the start", callback_data='start')
+    markup = telebot.types.InlineKeyboardMarkup(row_width=1)
+    markup.add(button1, button2)
+    bot.send_message(message.chat.id, text="What else should I do? 🫡",
+                     reply_markup=markup)
+    pdf_maker.empty_temp()
+
 
 
 @bot.message_handler(func=lambda m: m.text == "Make QR from Link")
@@ -70,6 +88,8 @@ def callback(call):
         zip_request(call.message)
     elif call.data == 'rmbg_request':
         rmbg_request(call.message)
+    elif call.data == 'pdf_request':
+        pdf_request(call.message)
     elif call.data == 'start':
         start(call.message)
 
@@ -103,7 +123,7 @@ def make_zip(message):
 @bot.message_handler(func=lambda m: m.text == "Remove Photo Background")
 def rmbg_request(message):
     bot.send_chat_action(message.chat.id, action="typing")
-    user_photo = bot.send_message(message.chat.id, text="Ok, send me your photo to me 🏞")
+    user_photo = bot.send_message(message.chat.id, text="Ok, send me your photo 🏞")
     bot.register_next_step_handler(user_photo, make_rmbg)
 
 
@@ -114,7 +134,7 @@ def make_rmbg(message):
     bot.send_chat_action(message.chat.id, action='upload_photo')
     photo = bot.send_photo(message.chat.id, image)
     bot.reply_to(photo, text="Here's your photo without background! ☝️☝️")
-    button1 = types.InlineKeyboardButton("Remove background ", callback_data='rmbg_request')
+    button1 = types.InlineKeyboardButton("Remove another background image", callback_data='rmbg_request')
     button2 = types.InlineKeyboardButton("Take me to the start", callback_data='start')
     markup = telebot.types.InlineKeyboardMarkup(row_width=1)
     markup.add(button1, button2)
