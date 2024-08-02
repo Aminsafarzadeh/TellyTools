@@ -5,6 +5,8 @@ import qr_maker
 import zip_maker
 import rmbg_maker
 import pdf_maker
+import bw_maker
+import pprint
 
 bot = telebot.TeleBot(API_TOKEN)
 
@@ -28,16 +30,13 @@ def start(message):
     bot.send_message(message.chat.id, text="What can I do for you? 😊", reply_markup=start_buttons)
 
 
-@bot.message_handler(commands=['help'])
-def help(message):
-    pass
-
-
 @bot.message_handler(func=lambda m: m.text == "Convert Image to PDF")
 def pdf_request(message):
     bot.send_chat_action(message.chat.id, action="typing")
     user_photo = bot.send_message(message.chat.id, text="Ok, send me your photo 🏞")
     bot.register_next_step_handler(user_photo, make_pdf)
+
+
 def make_pdf(message):
     file_info = bot.get_file(message.photo[-1].file_id)
     downloaded_file = bot.download_file(file_info.file_path)
@@ -52,7 +51,6 @@ def make_pdf(message):
     bot.send_message(message.chat.id, text="What else should I do? 🫡",
                      reply_markup=markup)
     pdf_maker.empty_temp()
-
 
 
 @bot.message_handler(func=lambda m: m.text == "Make QR from Link")
@@ -90,6 +88,8 @@ def callback(call):
         rmbg_request(call.message)
     elif call.data == 'pdf_request':
         pdf_request(call.message)
+    elif call.data == 'bw_request':
+        bw_request(call.message)
     elif call.data == 'start':
         start(call.message)
 
@@ -142,14 +142,47 @@ def make_rmbg(message):
                      reply_markup=markup)
 
 
-@bot.message_handler(func=lambda m: m.text == "تبدیل عکس به PDF")
-def pdf(message):
-    pass
+@bot.message_handler(func=lambda m: m.text == "Add Black & White to My Photo")
+def bw_request(message):
+    bot.send_chat_action(message.chat.id, action="typing")
+    user_photo = bot.send_message(message.chat.id, text="Ok, send me your photo to add B&W effect!⚫️⚪️")
+    bot.register_next_step_handler(user_photo, make_bw)
 
 
-@bot.message_handler(func=lambda m: m.text == "تبدیل عکس به PDF")
-def pdf(message):
-    pass
+def make_bw(message):
+    file_info = bot.get_file(message.photo[-1].file_id)
+    downloaded_file = bot.download_file(file_info.file_path)
+    image = bw_maker.bw_effect(downloaded_file)
+    bot.send_chat_action(message.chat.id, action='upload_document')
+    file = bot.send_document(message.chat.id, image)
+    bot.reply_to(file, text="Here's your Black & White image😎! ☝️☝️")
+    button1 = types.InlineKeyboardButton("Make another B&W image", callback_data='bw_request')
+    button2 = types.InlineKeyboardButton("Take me to the start", callback_data='start')
+    markup = telebot.types.InlineKeyboardMarkup(row_width=1)
+    markup.add(button1, button2)
+    bot.send_message(message.chat.id, text="What else should I do? 🫡",
+                     reply_markup=markup)
+    bw_maker.empty_temp()
+
+
+@bot.message_handler(content_types=['contact'])
+def verify_user(message):
+    button = types.InlineKeyboardButton("Take me to the start", callback_data='start')
+    markup = telebot.types.InlineKeyboardMarkup(row_width=1)
+    markup.add(button)
+    with open("verified_user.txt", 'rt') as check:
+        for i in check:
+            if str(message.contact)[:33] == i[:33]:
+                bot.send_chat_action(message.chat.id, action="typing")
+                bot.send_message(message.chat.id, "Your account has already been verified✅🫡", reply_markup=markup)
+                break
+        else:
+            with open("verified_user.txt", 'a') as txt:
+                txt.write(str(message.contact))
+                txt.write('\n')
+            pprint.pprint(f"user {message.contact} verified and added to list")
+            bot.send_chat_action(message.chat.id, action="typing")
+            bot.send_message(message.chat.id, "Your account has been successfully verified!✅", reply_markup=markup)
 
 
 if __name__ == '__main__':
