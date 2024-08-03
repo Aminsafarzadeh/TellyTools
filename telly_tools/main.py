@@ -30,7 +30,24 @@ def start(message):
     bot.send_message(message.chat.id, text="What can I do for you? 😊", reply_markup=start_buttons)
 
 
+@bot.callback_query_handler(func=lambda call: True)
+def callback(call):
+    if call.data == 'qr_request':
+        qr_request(call.message)
+    elif call.data == 'zip_request':
+        zip_request(call.message)
+    elif call.data == 'rmbg_request':
+        rmbg_request(call.message)
+    elif call.data == 'pdf_request':
+        pdf_request(call.message)
+    elif call.data == 'bw_request':
+        bw_request(call.message)
+    elif call.data == 'start':
+        start(call.message)
+
+
 @bot.message_handler(func=lambda m: m.text == "Convert Image to PDF")
+@bot.message_handler(commands=['pdfmaker'])
 def pdf_request(message):
     bot.send_chat_action(message.chat.id, action="typing")
     user_photo = bot.send_message(message.chat.id, text="Ok, send me your photo 🏞")
@@ -78,23 +95,8 @@ def make_qr(message):
     qr_maker.empty_temp()
 
 
-@bot.callback_query_handler(func=lambda call: True)
-def callback(call):
-    if call.data == 'qr_request':
-        qr_request(call.message)
-    elif call.data == 'zip_request':
-        zip_request(call.message)
-    elif call.data == 'rmbg_request':
-        rmbg_request(call.message)
-    elif call.data == 'pdf_request':
-        pdf_request(call.message)
-    elif call.data == 'bw_request':
-        bw_request(call.message)
-    elif call.data == 'start':
-        start(call.message)
-
-
 @bot.message_handler(func=lambda m: m.text == "ZIP My File")
+@bot.message_handler(commands=['zipmaker'])
 def zip_request(message):
     bot.send_chat_action(message.chat.id, action="typing")
     user_file = bot.send_message(message.chat.id,
@@ -121,6 +123,7 @@ def make_zip(message):
 
 
 @bot.message_handler(func=lambda m: m.text == "Remove Photo Background")
+@bot.message_handler(commands=['bgremover'])
 def rmbg_request(message):
     bot.send_chat_action(message.chat.id, action="typing")
     user_photo = bot.send_message(message.chat.id, text="Ok, send me your photo 🏞")
@@ -130,8 +133,8 @@ def rmbg_request(message):
 def make_rmbg(message):
     file_info = bot.get_file(message.photo[-1].file_id)
     downloaded_file = bot.download_file(file_info.file_path)
-    image = rmbg_maker.remover(downloaded_file)
     bot.send_chat_action(message.chat.id, action='upload_photo')
+    image = rmbg_maker.remover(downloaded_file)
     photo = bot.send_photo(message.chat.id, image)
     bot.reply_to(photo, text="Here's your photo without background! ☝️☝️")
     button1 = types.InlineKeyboardButton("Remove another background image", callback_data='rmbg_request')
@@ -143,6 +146,7 @@ def make_rmbg(message):
 
 
 @bot.message_handler(func=lambda m: m.text == "Add Black & White to My Photo")
+@bot.message_handler(commands=['b&w'])
 def bw_request(message):
     bot.send_chat_action(message.chat.id, action="typing")
     user_photo = bot.send_message(message.chat.id, text="Ok, send me your photo to add B&W effect!⚫️⚪️")

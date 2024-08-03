@@ -2,3 +2,5 @@ pillow~=10.4.0
 PyQRCode~=1.2.1
 fpdf~=1.7.2
 rembg~=2.0.57
+pyTelegramBotAPI~=4.21.0
+pypng
